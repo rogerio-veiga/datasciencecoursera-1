@@ -50,8 +50,37 @@ summary(mtcars)
 
 You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r eda, echo=FALSE}
+plot(mtcars$am, mtcars$mpg)
+abline(lm(mtcars$mpg ~ mtcars$am))
 ```
+```{r eda1, echo=FALSE}
+mtcars$transtype <- 'Automatic'
+mtcars[mtcars$am == 1, ]$transtype <- 'Manual'
+mtcars$transtype <- as.factor(mtcars$transtype)
+plot(mtcars$transtype, mtcars$mpg)
+abline(lm(mtcars$mpg ~ mtcars$transtype))
+```
+
+```{r eda2, echo=FALSE}
+plot(mtcars$am, mtcars$mpg)
+abline(lm(mtcars$mpg ~ mtcars$am))
+```
+
+```{r eda3, echo=FALSE}
+plot(mtcars$wt, mtcars$mpg)
+abline(lm(mtcars$mpg ~ mtcars$wt))
+```
+
+```{r eda4, echo=FALSE}
+plot(mtcars$disp, mtcars$mpg)
+abline(lm(mtcars$mpg ~ mtcars$disp))
+```
+
+```{r eda5, echo=FALSE}
+plot(mtcars$drat, mtcars$mpg)
+abline(lm(mtcars$mpg ~ mtcars$drat))
+```
+
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
