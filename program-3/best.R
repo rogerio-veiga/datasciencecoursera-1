@@ -1,4 +1,4 @@
-best <- function(state, outcome) {
+best <- function(state, outcome, rank = 1) {
   ## Validate the outcome asked for
   okay <- FALSE
   valid_outcomes <- c("heart attack", "heart failure", "pneumonia")
@@ -53,8 +53,12 @@ best <- function(state, outcome) {
   {
     stop("Something Went Wrong")
   }
-  order_by_data_data = by_state_data[order(by_state_data[idx],by_state_data[2]),]
-  order_by_data_data[1,2]
+  order_by_data_data = by_state_data[order(by_state_data[idx],by_state_data[2],na.last = NA),]
+  if (rank == 0 )
+  {
+    rank = nrow(order_by_data_data)
+  }
+  order_by_data_data[rank,2]
 }
 ## Check that state and outcome are valid
 ## Return hospital name in that state with lowest 30-day death

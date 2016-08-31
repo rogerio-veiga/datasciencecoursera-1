@@ -14,3 +14,17 @@
 # [,10]	gear	Number of forward gears
 # [,11]	carb	Number of carburetors
 
+# http://blog.yhat.com/posts/r-lm-summary.html
+
+# http://www.r-tutor.com/elementary-statistics/simple-linear-regression/residual-plot
+
+
+data("mtcars")
+
+plot ( mtcars[mtcars$am == 0, ]$wt, mtcars[mtcars$am == 0, ]$mpg , pch=0, col='blue')
+abline(lm ( mtcars[mtcars$am == 0, ]$mpg ~ mtcars[mtcars$am == 0, ]$wt ), col='blue')
+points ( mtcars[mtcars$am == 1, ]$wt, mtcars[mtcars$am == 1, ]$mpg , pch=1, col='red')
+abline(lm ( mtcars[mtcars$am == 1, ]$mpg ~ mtcars[mtcars$am == 1, ]$wt ), col='red')
+
+fit <- lm ( mtcars[mtcars$am == 1, ]$mpg ~ mtcars[mtcars$am == 1, ]$wt )
+
