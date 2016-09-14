@@ -117,6 +117,14 @@ labelName <- 'classe'
 predictors <- names(df)[names(df) != labelName]
 
 
+tobject <- train( df[,predictors], df[,labelName], model='rf')
+
+
+tt <- read.csv('pml-testing.csv')
+preds <- predict(tobject, tt[,predictors])
+
+# B A B A A E D B A A B C B A E E A B B B
+
 
 
 
