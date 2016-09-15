@@ -1,5 +1,5 @@
 library(caret)
-rm(df)
+
 df <- read.csv('pml-training.csv')
 df <- df[,-1]
 df <- df[,-2]
@@ -115,16 +115,18 @@ df <- df[,-45]
 
 labelName <- 'classe'
 predictors <- names(df)[names(df) != labelName]
-
-
+set.seed(819)
+# used to pass quiz 100%
 tobject <- train( df[,predictors], df[,labelName], model='rf')
-
-
 tt <- read.csv('pml-testing.csv')
 preds <- predict(tobject, tt[,predictors])
 
 # B A B A A E D B A A B C B A E E A B B B
 
+
+model <- train(classe~., data=df, trControl=trainControl(method="cv",number=5), method="rf")
+# summarize results
+print(model$finalModel)
 
 
 
