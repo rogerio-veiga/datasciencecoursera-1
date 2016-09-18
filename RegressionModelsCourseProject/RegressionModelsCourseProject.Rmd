@@ -1,7 +1,7 @@
 ---
 title: "Regression Models Course Project"
 author: "Todd Kemmerling"
-date: "August 28, 2016"
+date: "August 31, 2016"
 output: pdf_document
 ---
 
@@ -9,78 +9,104 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 data("mtcars")
-```
-
-## Questions To Be Answered
-
-You work for Motor Trend, a magazine about the automobile industry. Looking at a data set of a collection of cars, they are interested in exploring the relationship between a set of variables and miles per gallon (MPG) (outcome). They are particularly interested in the following two questions:
-
-“Is an automatic or manual transmission better for MPG”
-
-"Quantify the MPG difference between automatic and manual transmissions"
-
-## Grading Criteria
-
-1. Did the student interpret the coefficients correctly?
-2. Did the student do some exploratory data analyses?
-3. Did the student fit multiple models and detail their strategy for model selection?
-4. Did the student answer the questions of interest or detail why the question(s) is (are) not answerable?
-5. Did the student do a residual plot and some diagnostics?
-6. Did the student quantify the uncertainty in their conclusions and/or perform an inference correctly?
-7. Was the report brief (about 2 pages long) for the main body of the report and no longer than 5 with supporting appendix of figures?
-8. Did the report include an executive summary?
-9. Was the report done in Rmd (knitr)?
-
-Your report must be:
-
-Written as a PDF printout of a compiled (using knitr) R markdown document.
-Brief. 
-
-Roughly the equivalent of 2 pages or less for the main text. 
-
-Supporting figures in an appendix can be included up to 5 total pages including the 2 for the main report. The appendix can only include figures.
-
-Include a first paragraph executive summary.
-
-```{r mtcars}
-summary(mtcars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r eda, echo=FALSE}
-plot(mtcars$am, mtcars$mpg)
-abline(lm(mtcars$mpg ~ mtcars$am))
-```
-```{r eda1, echo=FALSE}
 mtcars$transtype <- 'Automatic'
 mtcars[mtcars$am == 1, ]$transtype <- 'Manual'
 mtcars$transtype <- as.factor(mtcars$transtype)
-plot(mtcars$transtype, mtcars$mpg)
-abline(lm(mtcars$mpg ~ mtcars$transtype))
 ```
 
-```{r eda2, echo=FALSE}
-plot(mtcars$am, mtcars$mpg)
-abline(lm(mtcars$mpg ~ mtcars$am))
+## Summary
+
+This analysis is done from a sample of 32 cars of various makes and models. 19 of the cars have automatic transmissions and 13 have manual transmissions. This is a case where a simple look at the data can be a somewhat misleading. Constructing a simple linear model from the data appears to show a clear MPG advantage with a manual transmission. If we dig a bit deeper the weight of the vehicle also plays a significat part in MPG and at some vehicle weights the type of transmission makes no difference. It is not possible to conclude from this data that the transmissioin type makes any difference in the MPG of the vehicle.
+
+## Details of the Analysis
+
+```{r smodel}
+fit <- lm(formula = mtcars$mpg ~ mtcars$transtype)
+lift <- fit$coefficients[2]
 ```
 
-```{r eda3, echo=FALSE}
-plot(mtcars$wt, mtcars$mpg)
-abline(lm(mtcars$mpg ~ mtcars$wt))
+The plot and model below clearly shows a benefit (or lift) of `r round(lift,2)` MPG by using a manual transmission.
+
+
+```{r summaryplot, echo=FALSE}
+plot(mtcars$transtype, mtcars$mpg , ylab = 'MPG', main='Transmission Type versus MPG')
+abline(lm(mtcars$mpg ~ mtcars$transtype), col='blue')
 ```
+
+The next plot shows two data sets, one for each transmission type. It shows the influence of weight on MPG for each transmission type. The following R code is used to determine the impact per 1000 pounds of increased weight.
+
+```{r avmlifts}
+liftAuto <- lm ( mtcars[mtcars$am == 0, ]$mpg ~ mtcars[mtcars$am == 0, ]$wt )$coefficients[2]
+liftManual <- lm ( mtcars[mtcars$am == 1, ]$mpg ~ mtcars[mtcars$am == 1, ]$wt )$coefficients[2]
+```
+
+This shows for a manual transmission there is decrease of `r -round(liftManual,2)` MPG per 1000 pound increase weight. The corresponding decrease for an automatic transmission is `r -round(liftAuto,2)` MPG per 1000 pound increase weight.
+
+```{r plot2, echo=FALSE}
+plot ( mtcars[mtcars$am == 0, ]$wt, mtcars[mtcars$am == 0, ]$mpg , pch=0, col='blue', xlab = 'Weight x 1000 lbs', ylab = 'MPG', main = 'Weight vs Transmission vs MPG' )
+abline(lm ( mtcars[mtcars$am == 0, ]$mpg ~ mtcars[mtcars$am == 0, ]$wt ), col='blue')
+points ( mtcars[mtcars$am == 1, ]$wt, mtcars[mtcars$am == 1, ]$mpg , pch=1, col='red')
+abline(lm ( mtcars[mtcars$am == 1, ]$mpg ~ mtcars[mtcars$am == 1, ]$wt ), col='red')
+legend(x='topright', legend = c('Automatic','Manual'), col = c('blue','red'), pch= c(0,1) )
+```
+
+```{r finalmodel}
+fit <- lm(mtcars$mpg ~ mtcars$transtype + mtcars$wt)
+res <- residuals(fit)
+fits <- fitted(fit)
+plot(res ~ fits, main = 'Residuals at Fitted Points For Transmission + Weight', ylab = 'Residuals' , xlab = 'Fitted Points')
+abline(0,0)
+```
+
+
+```{r finalwtmodel}
+fit <- lm(mtcars$mpg ~ mtcars$wt)
+res <- residuals(fit)
+fits <- fitted(fit)
+plot(res ~ fits, main = 'Residuals at Fitted Points For Weight Only', ylab = 'Residuals' , xlab = 'Fitted Points')
+abline(0,0)
+```
+
+
+
+If we look at the mean and standard deviation of the residuals for each of these models.
+```{r}
+fit <- lm(mtcars$mpg ~ mtcars$transtype + mtcars$wt)
+res <- residuals(fit)
+mean(res)
+sd(res)
+```
+versus
+```{r}
+fit <- lm(mtcars$mpg ~ mtcars$wt)
+res <- residuals(fit)
+mean(res)
+sd(res)
+```
+We see very little difference.
+
+Also if we look at the summary statistics of this model, the t and p values tend to indicate little or no effect is caused on MPG by the type of transmission. However the weight of the vehicle appears to be the driving force.
+
+```{r summarystats}
+summary(lm(mtcars$mpg ~ mtcars$transtype + mtcars$wt))
+```
+
+## Other Models and Plots
+
+The plots below are each fitted with a linear model. Each shows a relationship to MPG and are also closely related to the weight of the vehicle.
 
 ```{r eda4, echo=FALSE}
-plot(mtcars$disp, mtcars$mpg)
+plot(mtcars$disp, mtcars$mpg, xlab = 'Displacement', ylab = 'MPG' , main = 'Displacement vs MPG')
 abline(lm(mtcars$mpg ~ mtcars$disp))
 ```
 
 ```{r eda5, echo=FALSE}
-plot(mtcars$drat, mtcars$mpg)
+plot(mtcars$hp, mtcars$mpg, xlab = 'Horsepower', ylab = 'MPG' , main = 'Horsepower vs MPG')
+abline(lm(mtcars$mpg ~ mtcars$disp))
+
+```{r eda6, echo=FALSE}
+plot(mtcars$drat, mtcars$mpg, xlab = 'Rear axle ratio', ylab = 'MPG' , main = 'Rear axle ratio vs MPG')
 abline(lm(mtcars$mpg ~ mtcars$drat))
 ```
 
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Note that the `echo = FALSE` parameter was added to some code chunks to prevent printing of the R code that generated the plot.
